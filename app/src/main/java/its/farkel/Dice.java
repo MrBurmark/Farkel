@@ -5,22 +5,26 @@ package its.farkel;
  */
 public class Dice {
     int held;
+    int total;
     int[] die;
 
     public Dice() {
+        held = 0;
+        total = 0;
         this.die = new int[6];
     }
 
     public Dice(Dice original) {
         this.held = original.held;
+        this.total = original.total;
         this.die = new int[6];
         for (int i = 0; i < 6; i++)
             this.die[i] = original.die[i];
     }
 
     public boolean addDie(int num) {
-        if (held < 6) {
-            die[held++] = num;
+        if (total < 6) {
+            die[total++] = num;
             return true;
         } else {
             return false;
@@ -28,12 +32,14 @@ public class Dice {
     }
 
     public boolean removeDie(int num) {
-        for(int i = held - 1; i >= 0; i--) {
+        for(int i = total - 1; i >= 0; i--) {
             if (die[i] == num) {
-                for(  ; i < held - 1; i++) {
+                if(i < held) held--;
+
+                for(  ; i < total - 1; i++) {
                     die[i] = die[i+1];
                 }
-                held--;
+                total--;
                 return true;
             }
         }
@@ -42,9 +48,12 @@ public class Dice {
 
     public void empty() {
         held = 0;
+        total = 0;
     }
 
     public int value() {
+
+        if(total != 6) return 0;
 
         int i, c, r = 0;
         // d[0] = number non-zero inputs, aka number of dice evaluating
@@ -113,6 +122,9 @@ public class Dice {
     }
 
     public float expectedValue() {
+
+        if(total != 6) return 0.0f;
+
         int c, i, j, k, l, m, n;
         double curVal, expRollVal;
         Dice newHand = new Dice();
@@ -194,6 +206,8 @@ public class Dice {
     }
 
     public Dice bestHand() {
+
+        if(total != 6) return this;
 
         int i, j, k, l, m, n;
         float bestVal, heldVal;
