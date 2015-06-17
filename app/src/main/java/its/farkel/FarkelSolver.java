@@ -6,7 +6,7 @@ package its.farkel;
 public class FarkelSolver {
 
     private static boolean initialized = false;
-    private static FarkelNode[][][][][][] farkel_tree;
+    public static float[][][][][][][] farkel_tree;
 
     private static void popFarkely(int numZeros) {
         int c, i, j, k, l, m, n;
@@ -40,7 +40,7 @@ public class FarkelSolver {
                                 if (0==m) c++;
                                 if (0==n) c++;
                                 if (c == numZeros)
-                                    getNode(hand).y = hand.expectedValue();
+                                    FarkelSolver.farkel_tree[1][hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]] = hand.expectedValue();
                             }}}}}}
     }
 
@@ -68,7 +68,7 @@ public class FarkelSolver {
                             for (n=0;n<7;n++)
                             {
                                 hand.die[5] = n;
-                                getNode(hand).x = hand.value();
+                                FarkelSolver.farkel_tree[0][hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]] = hand.value();
                             }}}}}}
     }
 
@@ -83,19 +83,11 @@ public class FarkelSolver {
         popFarkely(6);
     }
 
-    private static void initFarkel() {
-        farkel_tree = new FarkelNode[7][7][7][7][7][7];
-        popFarkel();
-        initialized = true;
-    }
-
-    public static FarkelNode getNode(Dice hand) {
-        if (!initialized) initFarkel();
-        return farkel_tree[hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]];
-    }
-
-    public class FarkelNode {
-        float x;
-        float y;
+    public static void initFarkel() {
+        if (!initialized) {
+            farkel_tree = new float[2][7][7][7][7][7][7];
+            popFarkel();
+            initialized = true;
+        }
     }
 }

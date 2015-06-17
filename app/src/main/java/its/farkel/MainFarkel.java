@@ -33,9 +33,24 @@ public class MainFarkel extends ActionBarActivity {
         }
     }
 
-    private void redisplay() {
+    private void redisplayTotal() {
         int i;
         for(i = 1; i <= hand.total; i++) {
+            ImageView v = (ImageView)findViewById(ids[i]);
+            v.setImageResource(drawables[hand.die[i-1]]);
+            v.setVisibility(ImageView.VISIBLE);
+            available[i] = false;
+        }
+        for(  ; i <= 6; i++) {
+            ImageView v = (ImageView)findViewById(ids[i]);
+            v.setVisibility(ImageView.INVISIBLE);
+            available[i] = true;
+        }
+    }
+
+    private void redisplayHeld() {
+        int i;
+        for(i = 1; i <= hand.held; i++) {
             ImageView v = (ImageView)findViewById(ids[i]);
             v.setImageResource(drawables[hand.die[i-1]]);
             v.setVisibility(ImageView.VISIBLE);
@@ -91,13 +106,14 @@ public class MainFarkel extends ActionBarActivity {
     }
 
     public void onclickSolve(View view) {
+        FarkelSolver.initFarkel();
         hand = hand.bestHand();
-        redisplay();
+        redisplayHeld();
     }
 
     public void onclickReset(View view) {
         hand.empty();
-        redisplay();
+        redisplayTotal();
     }
 
     public void onclickKeep1(View view) {

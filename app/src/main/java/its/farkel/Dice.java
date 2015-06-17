@@ -15,11 +15,15 @@ public class Dice {
     }
 
     public Dice(Dice original) {
-        this.held = original.held;
-        this.total = original.total;
         this.die = new int[6];
+        this.copy(original);
+    }
+
+    public void copy(Dice newDie) {
+        this.held = newDie.held;
+        this.total = newDie.total;
         for (int i = 0; i < 6; i++)
-            this.die[i] = original.die[i];
+            this.die[i] = newDie.die[i];
     }
 
     public boolean addDie(int num) {
@@ -137,7 +141,7 @@ public class Dice {
         if (0==die[4]) c++;
         if (0==die[5]) c++;
 
-        curVal = FarkelSolver.getNode(this).x;
+        curVal = FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
 
         if (0 == c) return (float)curVal;
 
@@ -192,8 +196,8 @@ public class Dice {
                                 } else {
                                     newHand.die[5] = n;
                                 }
-                                if (FarkelSolver.getNode(newHand).x > curVal)
-                                    expRollVal += FarkelSolver.getNode(newHand).y;
+                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > curVal)
+                                    expRollVal += FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]];
                             }}}}}}
 
         for (i = 0; i < c; i++)
@@ -214,12 +218,12 @@ public class Dice {
         Dice bestHand = new Dice(this);
         Dice newHand = new Dice();
 
-        bestVal = FarkelSolver.getNode(bestHand).y;
+        bestVal = FarkelSolver.farkel_tree[1][bestHand.die[0]][bestHand.die[1]][bestHand.die[2]][bestHand.die[3]][bestHand.die[4]][bestHand.die[5]];
 
         for (i=held; i < 6; i++)
             bestHand.die[i] = 0;
 
-        heldVal = FarkelSolver.getNode(bestHand).x;
+        heldVal = FarkelSolver.farkel_tree[0][bestHand.die[0]][bestHand.die[1]][bestHand.die[2]][bestHand.die[3]][bestHand.die[4]][bestHand.die[5]];
 
 
         for (i = (held > 0)?1:0; i<=1; i++)
@@ -247,9 +251,10 @@ public class Dice {
                                 newHand.die[5] = (0==n)?0:die[5];
 
                                 // if new hand is keepable, and has a better expected value
-                                if (FarkelSolver.getNode(newHand).x > heldVal && FarkelSolver.getNode(newHand).y > bestVal) {
-                                    bestVal = FarkelSolver.getNode(newHand).y;
-                                    bestHand = newHand;
+                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > heldVal
+                                        && FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > bestVal) {
+                                    bestVal = FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]];
+                                    bestHand.copy(newHand);
                                 }
                             }}}}}}
 
