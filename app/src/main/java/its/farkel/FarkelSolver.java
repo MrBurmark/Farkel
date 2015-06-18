@@ -1,7 +1,7 @@
 package its.farkel;
 
 /**
- * Created by Its on 6/16/2015.
+ * Created by Jason Burmark on 6/16/2015.
  */
 public class FarkelSolver {
 
@@ -11,8 +11,6 @@ public class FarkelSolver {
     private static void popFarkely(int numZeros) {
         int c, i, j, k, l, m, n;
         Dice hand = new Dice();
-
-        hand.held = 0;
 
         for (i=0;i<7;i++)
         {
@@ -40,15 +38,13 @@ public class FarkelSolver {
                                 if (0==m) c++;
                                 if (0==n) c++;
                                 if (c == numZeros)
-                                    FarkelSolver.farkel_tree[1][hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]] = hand.expectedValue();
+                                    FarkelSolver.farkel_tree[1][hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]] = hand.expectedValueInternal();
                             }}}}}}
     }
 
     private static void popFarkelx() {
         int i, j, k, l, m, n;
         Dice hand = new Dice();
-
-        hand.held = 0;
 
         for (i=0;i<7;i++)
         {
@@ -68,7 +64,7 @@ public class FarkelSolver {
                             for (n=0;n<7;n++)
                             {
                                 hand.die[5] = n;
-                                FarkelSolver.farkel_tree[0][hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]] = hand.value();
+                                FarkelSolver.farkel_tree[0][hand.die[0]][hand.die[1]][hand.die[2]][hand.die[3]][hand.die[4]][hand.die[5]] = hand.valueInternal();
                             }}}}}}
     }
 

@@ -1,16 +1,14 @@
 package its.farkel;
 
 /**
- * Created by Its on 6/16/2015.
+ * Created by Jason Burmark on 6/16/2015.
  */
 public class Dice {
     int held;
-    int total;
     int[] die;
 
     public Dice() {
         held = 0;
-        total = 0;
         this.die = new int[6];
     }
 
@@ -21,29 +19,32 @@ public class Dice {
 
     public void copy(Dice newDie) {
         this.held = newDie.held;
-        this.total = newDie.total;
-        for (int i = 0; i < 6; i++)
-            this.die[i] = newDie.die[i];
+        System.arraycopy(newDie.die, 0, this.die, 0, 6);
     }
 
     public boolean addDie(int num) {
-        if (total < 6) {
-            die[total++] = num;
-            return true;
-        } else {
-            return false;
+        for(int i = 0; i < 6; i++) {
+            if (die[i] == 0) {
+                die[i] = num;
+                return true;
+            }
         }
+        return false;
     }
 
     public boolean removeDie(int num) {
-        for(int i = total - 1; i >= 0; i--) {
+        for(int i = 5; i >= 0; i--) {
             if (die[i] == num) {
                 if(i < held) held--;
 
-                for(  ; i < total - 1; i++) {
-                    die[i] = die[i+1];
+                int j;
+                for(j = 5; j > 0; j--) {
+                    if (die[j] != 0) {
+                        die[i] = die[j];
+                        break;
+                    }
                 }
-                total--;
+                die[j] = 0;
                 return true;
             }
         }
@@ -52,24 +53,29 @@ public class Dice {
 
     public void empty() {
         held = 0;
-        total = 0;
+        for(int i = 0; i < 6; i++) {
+            die[i] = 0;
+        }
     }
 
-    public int value() {
+    public int value () {
+        return (int)FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
+    }
 
-        if(total != 6) return 0;
+    public float expectedValue() {
+        return FarkelSolver.farkel_tree[1][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
+    }
+
+    public int valueInternal() {
 
         int i, c, r = 0;
         // d[0] = number non-zero inputs, aka number of dice evaluating
         // d[i] = number of i's rolled
         int[] d = {0,0,0,0,0,0,0};
 
-        d[this.die[0]]++;
-        d[this.die[1]]++;
-        d[this.die[2]]++;
-        d[this.die[3]]++;
-        d[this.die[4]]++;
-        d[this.die[5]]++;
+        for(i = 0; i < 6; i++) {
+            d[die[i]]++;
+        }
         d[0] = 6 - d[0];
 
         for (i=1,c=0;i<=6;i++) // 6 of a kind
@@ -125,36 +131,30 @@ public class Dice {
         return r;
     }
 
-    public float expectedValue() {
-
-        if(total != 6) return 0.0f;
+    public float expectedValueInternal() {
 
         int c, i, j, k, l, m, n;
         double curVal, expRollVal;
         Dice newHand = new Dice();
 
         c = 0;
-        if (0==die[0]) c++;
-        if (0==die[1]) c++;
-        if (0==die[2]) c++;
-        if (0==die[3]) c++;
-        if (0==die[4]) c++;
-        if (0==die[5]) c++;
+        for(i = 0; i < 6; i++) {
+            if (0==die[i]) c++; // count the zeros
+        }
 
         curVal = FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
 
         if (0 == c) return (float)curVal;
 
-        newHand.held = 6-c;
         expRollVal = 0.0;
 
         for (i = (die[0] == 0)?1:0; i<=6; i++)
         {
             if (0 == i) {
                 newHand.die[0] = die[0];
-                i = 7;
+                i = 7; // only use existing value of the die if the die is held
             } else {
-                newHand.die[0] = i;
+                newHand.die[0] = i; // use all possible values for the die
             }
             for (j = (die[1] == 0)?1:0; j<=6; j++)
             {
@@ -210,11 +210,15 @@ public class Dice {
     }
 
     public Dice bestHand() {
-
-        if(total != 6) return this;
-
-        int i, j, k, l, m, n;
+        int c = 0, i, j, k, l, m, n;
         float bestVal, heldVal;
+
+        for(i = 0; i < 6; i++) {
+            if (0==die[i]) c++;
+        }
+        if(c != 0)
+            return this; // return if not holding 6 dice
+
         Dice bestHand = new Dice(this);
         Dice newHand = new Dice();
 
@@ -251,14 +255,14 @@ public class Dice {
                                 newHand.die[5] = (0==n)?0:die[5];
 
                                 // if new hand is keepable, and has a better expected value
-                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > heldVal
-                                        && FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > bestVal) {
+                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] >= heldVal
+                                        && FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] >= bestVal) {
                                     bestVal = FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]];
                                     bestHand.copy(newHand);
                                 }
                             }}}}}}
 
-        // put unrolled die at end of list
+        // put rolled die at front of list
         i = 0;
         j = 6;
         while (i < 6) {

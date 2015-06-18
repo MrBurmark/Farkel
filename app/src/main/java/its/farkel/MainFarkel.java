@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 
 public class MainFarkel extends ActionBarActivity {
@@ -19,6 +20,7 @@ public class MainFarkel extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_farkel);
+        FarkelSolver.initFarkel();
     }
 
     private void showDie(int num) {
@@ -27,40 +29,53 @@ public class MainFarkel extends ActionBarActivity {
                 ImageView v = (ImageView)findViewById(ids[i]);
                 v.setImageResource(drawables[num]);
                 v.setVisibility(ImageView.VISIBLE);
+                v.setImageAlpha(255 / 2);
                 available[i] = false;
+                revalue();
                 return;
             }
         }
     }
 
-    private void redisplayTotal() {
-        int i;
-        for(i = 1; i <= hand.total; i++) {
-            ImageView v = (ImageView)findViewById(ids[i]);
-            v.setImageResource(drawables[hand.die[i-1]]);
-            v.setVisibility(ImageView.VISIBLE);
-            available[i] = false;
-        }
-        for(  ; i <= 6; i++) {
-            ImageView v = (ImageView)findViewById(ids[i]);
+    private void removeDie(int id) {
+        if (!available[id]){
+            int val = hand.die[id-1];
+            hand.removeDie(val);
+            ImageView v = (ImageView)findViewById(ids[id]);
             v.setVisibility(ImageView.INVISIBLE);
-            available[i] = true;
+            available[id] = true;
+            revalue();
         }
     }
 
-    private void redisplayHeld() {
+    private void redisplay() {
         int i;
         for(i = 1; i <= hand.held; i++) {
             ImageView v = (ImageView)findViewById(ids[i]);
-            v.setImageResource(drawables[hand.die[i-1]]);
+            v.setImageResource(drawables[hand.die[i - 1]]);
             v.setVisibility(ImageView.VISIBLE);
+            v.setImageAlpha(255);
             available[i] = false;
         }
         for(  ; i <= 6; i++) {
-            ImageView v = (ImageView)findViewById(ids[i]);
-            v.setVisibility(ImageView.INVISIBLE);
-            available[i] = true;
+            if (hand.die[i-1] != 0) {
+                ImageView v = (ImageView)findViewById(ids[i]);
+                v.setImageResource(drawables[hand.die[i - 1]]);
+                v.setVisibility(ImageView.VISIBLE);
+                v.setImageAlpha(255 / 2);
+                available[i] = false;
+            } else {
+                ImageView v = (ImageView)findViewById(ids[i]);
+                v.setVisibility(ImageView.INVISIBLE);
+                available[i] = true;
+            }
         }
+        revalue();
+    }
+
+    private void revalue() {
+        TextView v = (TextView)findViewById(R.id.KeeptextView);
+        v.setText(String.format("Value - %d\nExpected - %.1f", hand.value(), hand.expectedValue()));
     }
 
     public void onclick1(View view) {
@@ -105,57 +120,51 @@ public class MainFarkel extends ActionBarActivity {
         }
     }
 
-    public void onclickSolve(View view) {
-        FarkelSolver.initFarkel();
-        hand = hand.bestHand();
-        redisplayHeld();
+    public void onclickSolve(View view){
+        Dice newHand = hand.bestHand();
+        if(newHand.expectedValue() > hand.value() && newHand.held > hand.held) {
+            // roll again
+            hand.copy(newHand);
+        } else {
+            // stay
+            hand.empty();
+        }
+        redisplay();
     }
 
     public void onclickReset(View view) {
         hand.empty();
-        redisplayTotal();
+        redisplay();
     }
 
     public void onclickKeep1(View view) {
-        int num = 1;
-        hand.removeDie(num);
-        view.setVisibility(ImageView.INVISIBLE);
-        available[num] = true;
+        int id = 1;
+        removeDie(id);
     }
 
     public void onclickKeep2(View view) {
-        int num = 2;
-        hand.removeDie(num);
-        view.setVisibility(ImageView.INVISIBLE);
-        available[num] = true;
+        int id = 2;
+        removeDie(id);
     }
 
     public void onclickKeep3(View view) {
-        int num = 3;
-        hand.removeDie(num);
-        view.setVisibility(ImageView.INVISIBLE);
-        available[num] = true;
+        int id = 3;
+        removeDie(id);
     }
 
     public void onclickKeep4(View view) {
-        int num = 4;
-        hand.removeDie(num);
-        view.setVisibility(ImageView.INVISIBLE);
-        available[num] = true;
+        int id = 4;
+        removeDie(id);
     }
 
     public void onclickKeep5(View view) {
-        int num = 5;
-        hand.removeDie(num);
-        view.setVisibility(View.INVISIBLE);
-        available[num] = true;
+        int id = 5;
+        removeDie(id);
     }
 
     public void onclickKeep6(View view) {
-        int num = 6;
-        hand.removeDie(num);
-        view.setVisibility(ImageView.INVISIBLE);
-        available[num] = true;
+        int id = 6;
+        removeDie(id);
     }
 
     @Override
