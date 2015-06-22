@@ -1,13 +1,18 @@
 package its.farkel;
 
+import java.util.Random;
+
 /**
  * Created by Jason Burmark on 6/16/2015.
+ * Basic Dice class to hold a hand of 6 die and the number of held and advised die
  */
 public class Dice {
-    int held;
-    int[] die;
+    int advised; // >= held, <= 6
+    int held; // >= 0, <= advised
+    int[] die; // length 6
 
     public Dice() {
+        advised = 0;
         held = 0;
         this.die = new int[6];
     }
@@ -17,12 +22,30 @@ public class Dice {
         this.copy(original);
     }
 
+    public int numDice() {
+        int c = 0;
+        for(int i = 0; i < 6; i++) {
+            if (0 != die[i]) c++; // count the dice
+        }
+        return c;
+    }
+
     public void copy(Dice newDie) {
+        this.advised = newDie.advised;
         this.held = newDie.held;
         System.arraycopy(newDie.die, 0, this.die, 0, 6);
     }
 
+    public void roll() {
+        Random r = new Random(System.currentTimeMillis());
+        for(int i = advised; i < 6; i++) {
+            die[i] = r.nextInt(6) + 1;
+        }
+        held = advised;
+    }
+
     public boolean addDie(int num) {
+        if (num <= 0 || num > 6) return false;
         for(int i = 0; i < 6; i++) {
             if (die[i] == 0) {
                 die[i] = num;
@@ -33,40 +56,150 @@ public class Dice {
     }
 
     public boolean removeDie(int num) {
+        if (num <= 0 || num > 6) return false;
         for(int i = 5; i >= 0; i--) {
             if (die[i] == num) {
+                if(i < advised) advised--;
                 if(i < held) held--;
 
-                int j;
-                for(j = 5; j > 0; j--) {
-                    if (die[j] != 0) {
-                        die[i] = die[j];
-                        break;
-                    }
-                }
-                die[j] = 0;
+                System.arraycopy(die, i + 1, die, i, 5 - i);
+                die[5] = 0;
                 return true;
             }
         }
         return false;
     }
 
+    public void removeUnheld() {
+        for(int i = held; i < 6; i++) {
+            die[i] = 0;
+        }
+        advised = held;
+    }
+
+    public boolean addHold(int num) {
+        if (num <= 0 || num > 6) return false;
+        for(int i = held; i < 6; i++) {
+            if (die[i] == num) {
+                int tmp = die[held];
+                die[held] = die[i];
+                die[i] = tmp;
+                held++;
+                if (advised < held) advised = held;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeHold(int num) {
+        if (num <= 0 || num > 6) return false;
+        for(int i = 0; i < held; i++) {
+            if (die[i] == num) {
+                int tmp = die[held-1];
+                die[held-1] = die[i];
+                die[i] = tmp;
+                held--;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean addAdvised(int num) {
+        if (num <= 0 || num > 6) return false;
+        for(int i = advised; i < 6; i++) {
+            if (die[i] == num) {
+                int tmp = die[advised];
+                die[advised] = die[i];
+                die[i] = tmp;
+                advised++;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeAdvised(int num) {
+        if (num <= 0 || num > 6) return false;
+        for(int i = held; i < advised; i++) {
+            if (die[i] == num) {
+                int tmp = die[advised-1];
+                die[advised-1] = die[i];
+                die[i] = tmp;
+                advised--;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void advise() {
+        Dice bestHand = this.bestHand();
+
+        if(bestHand.advised > this.held) {
+            // should roll again, advise which to hold
+            for(int i = bestHand.held; i < bestHand.advised; i++) {
+                this.addAdvised(bestHand.die[i]);
+            }
+            this.advised = bestHand.advised; // should be done in addAdvised anyway
+        } else if (bestHand.expectedValue() == this.value()) {
+            // already at best value
+            this.advised = 6;
+        }
+    }
+
     public void empty() {
         held = 0;
+        advised = 0;
         for(int i = 0; i < 6; i++) {
             die[i] = 0;
         }
     }
 
-    public int value () {
-        return (int)FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
+    public float heldValue () {
+        Dice heldOnly = new Dice(this);
+        for(int i = held; i < 6; i++) {
+            heldOnly.die[i] = 0;
+        }
+        return FarkelSolver.farkel_tree[0][heldOnly.die[0]][heldOnly.die[1]][heldOnly.die[2]][heldOnly.die[3]][heldOnly.die[4]][heldOnly.die[5]];
+    }
+
+    public float advisedValue () {
+        Dice advisedOnly = new Dice(this);
+        for(int i = advised; i < 6; i++) {
+            advisedOnly.die[i] = 0;
+        }
+        return FarkelSolver.farkel_tree[0][advisedOnly.die[0]][advisedOnly.die[1]][advisedOnly.die[2]][advisedOnly.die[3]][advisedOnly.die[4]][advisedOnly.die[5]];
+
+    }
+
+    public float value () {
+        return FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
+    }
+
+    public float heldExpectedValue () {
+        Dice heldOnly = new Dice(this);
+        for(int i = held; i < 6; i++) {
+            heldOnly.die[i] = 0;
+        }
+        return FarkelSolver.farkel_tree[1][heldOnly.die[0]][heldOnly.die[1]][heldOnly.die[2]][heldOnly.die[3]][heldOnly.die[4]][heldOnly.die[5]];
+    }
+
+    public float advisedExpectedValue () {
+        Dice advisedOnly = new Dice(this);
+        for(int i = advised; i < 6; i++) {
+            advisedOnly.die[i] = 0;
+        }
+        return FarkelSolver.farkel_tree[1][advisedOnly.die[0]][advisedOnly.die[1]][advisedOnly.die[2]][advisedOnly.die[3]][advisedOnly.die[4]][advisedOnly.die[5]];
+
     }
 
     public float expectedValue() {
         return FarkelSolver.farkel_tree[1][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
     }
 
-    public int valueInternal() {
+    public float valueInternal() {
 
         int i, c, r = 0;
         // d[0] = number non-zero inputs, aka number of dice evaluating
@@ -222,13 +355,8 @@ public class Dice {
         Dice bestHand = new Dice(this);
         Dice newHand = new Dice();
 
-        bestVal = FarkelSolver.farkel_tree[1][bestHand.die[0]][bestHand.die[1]][bestHand.die[2]][bestHand.die[3]][bestHand.die[4]][bestHand.die[5]];
-
-        for (i=held; i < 6; i++)
-            bestHand.die[i] = 0;
-
-        heldVal = FarkelSolver.farkel_tree[0][bestHand.die[0]][bestHand.die[1]][bestHand.die[2]][bestHand.die[3]][bestHand.die[4]][bestHand.die[5]];
-
+        bestVal = this.value();
+        heldVal = this.heldValue();
 
         for (i = (held > 0)?1:0; i<=1; i++)
         {
@@ -255,8 +383,8 @@ public class Dice {
                                 newHand.die[5] = (0==n)?0:die[5];
 
                                 // if new hand is keepable, and has a better expected value
-                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] >= heldVal
-                                        && FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] >= bestVal) {
+                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > heldVal
+                                        && FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > bestVal) {
                                     bestVal = FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]];
                                     bestHand.copy(newHand);
                                 }
@@ -281,7 +409,7 @@ public class Dice {
             }
             i++;
         }
-        bestHand.held = j;
+        bestHand.advised = j;
 
         return bestHand;
     }
