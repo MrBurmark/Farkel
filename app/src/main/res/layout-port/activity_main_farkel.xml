@@ -45,15 +45,6 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/grid_top2"
-            android:orientation="horizontal"
-            android:background="@android:color/transparent">
-
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -66,6 +57,15 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/grid_top2"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
+
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -77,15 +77,6 @@
                 android:layout_marginRight="4dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/grid_top3"
-            android:orientation="horizontal"
-            android:background="@android:color/transparent">
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -118,10 +109,9 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/grid_top"
-        android:layout_toEndOf="@+id/grid_top"
+        android:layout_below="@+id/grid_top"
         android:id="@+id/grid_middle"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:background="@android:color/transparent"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp">
@@ -156,8 +146,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/grid_middle"
-        android:layout_toEndOf="@+id/grid_middle"
+        android:layout_below="@+id/grid_middle"
         android:id="@+id/grid_bottom"
         android:orientation="vertical">
 
@@ -192,15 +181,6 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp" />
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/grid_bottom2"
-            android:orientation="horizontal"
-            android:background="@android:color/transparent">
-
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -213,6 +193,15 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/grid_bottom2"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
+
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -224,15 +213,6 @@
                 android:layout_marginRight="4dp"
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="2dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/grid_bottom3"
-            android:orientation="horizontal"
-            android:background="@android:color/transparent">
 
             <ImageButton
                 android:layout_width="wrap_content"
@@ -262,19 +242,18 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/grid_bottom"
-        android:layout_toEndOf="@id/grid_bottom"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@id/grid_top"
+        android:layout_toEndOf="@id/grid_top"
         android:id="@+id/grid_right"
-        android:orientation="vertical"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="2dp">
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:text="@string/hand_value"
             android:id="@+id/ValueTextView"
             android:elegantTextHeight="false"
@@ -283,32 +262,22 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/ValueTextView"
             android:text="@string/points"
             android:id="@+id/PlayerTextView"
             android:gravity="fill_horizontal"/>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/grid_bottom"
-        android:layout_toRightOf="@id/grid_right"
-        android:layout_toEndOf="@id/grid_right"
-        android:id="@+id/grid_rightmost"
-        android:orientation="vertical"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="2dp">
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/ResetButton"
             android:text="@string/manual_only"
             android:id="@+id/manualTextView"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/ResetHand"
             android:text="@string/reset"
             android:id="@+id/ResetButton"
             android:clickable="true"
@@ -320,6 +289,7 @@
 
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/HoldButton"
             android:text="@string/reset_hand"
             android:id="@+id/ResetHand"
             android:onClick="onclickResetHand"
@@ -329,12 +299,13 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:text="@string/hold"
             android:id="@+id/HoldButton"
             android:onClick="onclickHold"
             android:clickable="true"
             style="?android:attr/buttonStyleSmall"/>
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package its.farkel;
 
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -7,6 +8,120 @@ import java.util.Random;
  * Basic Dice class to hold a hand of 6 die and the number of held and advised die
  */
 public class Dice {
+
+    //public static float[] factorial_0_to_6 = {1, 1, 2, 6, 24, 120, 720};
+    private static boolean farkel_initialized = false;
+    private static HashMap<Integer, float[]> farkel_hash;
+
+        private static void popFarkel_hash_y(int numZeros) {
+        int c, i, j, k, l, m, n;
+        Dice hand = new Dice();
+
+        c = 0;
+
+        for (i=0;i<7;i++)
+        {
+            hand.die[0] = i;
+            if (0==i) c++;
+            if (c <= numZeros)
+                for (j=0;j<7;j++)
+                {
+                    hand.die[1] = j;
+                    if (0==j) c++;
+                    if (c <= numZeros)
+                        for (k=0;k<7;k++)
+                        {
+                            hand.die[2] = k;
+                            if (0==k) c++;
+                            if (c <= numZeros)
+                                for (l=0;l<7;l++)
+                                {
+                                    hand.die[3] = l;
+                                    if (0==l) c++;
+                                    if (c <= numZeros)
+                                        for (m=0;m<7;m++)
+                                        {
+                                            hand.die[4] = m;
+                                            if (0==m) c++;
+                                            if (c <= numZeros)
+                                                for (n=0;n<7;n++)
+                                                {
+                                                    hand.die[5] = n;
+                                                    if (0==n) c++;
+
+                                                    if (c == numZeros) {
+                                                        if (Dice.farkel_hash.get(hand.hashCode())[1] == 0)
+                                                            Dice.farkel_hash.get(hand.hashCode())[1] = hand.expectedValueInternal();
+                                                    }
+
+                                                    if (0==n) c--;
+                                                }
+                                            if (0==m) c--;
+                                        }
+                                    if (0==l) c--;
+                                }
+                            if (0==k) c--;
+                        }
+                    if (0==j) c--;
+                }
+            if (0==i) c--;
+        }
+    }
+
+    private static void popFarkel_hash_x() {
+        int i, j, k, l, m, n;
+        Dice hand = new Dice();
+
+        for (i=0;i<7;i++)
+        {
+            hand.die[0] = i;
+            for (j=0;j<7;j++)
+            {
+                hand.die[1] = j;
+                for (k=0;k<7;k++)
+                {
+                    hand.die[2] = k;
+                    for (l=0;l<7;l++)
+                    {
+                        hand.die[3] = l;
+                        for (m=0;m<7;m++)
+                        {
+                            hand.die[4] = m;
+                            for (n=0;n<7;n++)
+                            {
+                                hand.die[5] = n;
+
+                                if (!Dice.farkel_hash.containsKey(hand.hashCode())) {
+                                    Dice.farkel_hash.put(hand.hashCode(), new float[]{hand.valueInternal(), 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void popFarkel_hash() {
+        popFarkel_hash_x();
+        popFarkel_hash_y(0);
+        popFarkel_hash_y(1);
+        popFarkel_hash_y(2);
+        popFarkel_hash_y(3);
+        popFarkel_hash_y(4);
+        popFarkel_hash_y(5);
+        popFarkel_hash_y(6);
+    }
+
+    public static void initFarkel() {
+        if (!farkel_initialized) {
+            farkel_hash = new HashMap<>(924);
+            popFarkel_hash();
+            farkel_initialized = true;
+        }
+    }
+
+
     int advised; // >= held, <= 6
     int held; // >= 0, <= advised
     int[] die; // length 6
@@ -144,7 +259,7 @@ public class Dice {
             }
             this.advised = bestHand.advised; // should be done in addAdvised anyway
         } else if (bestHand.expectedValue() == this.value()) {
-            // already at best value
+            // already at best value_tree
             this.advised = 6;
         }
     }
@@ -157,58 +272,25 @@ public class Dice {
         }
     }
 
-    public float heldValue () {
-        Dice heldOnly = new Dice(this);
-        for(int i = held; i < 6; i++) {
-            heldOnly.die[i] = 0;
+    public int[] frequencies() {
+        // d[0] = number zero inputs, aka number of dice not rolled
+        // d[i] = number of i's rolled
+        int[] d = new int[]{0,0,0,0,0,0,0};
+
+        for(int i = 0; i < die.length; i++) {
+            d[die[i]]++;
         }
-        return FarkelSolver.farkel_tree[0][heldOnly.die[0]][heldOnly.die[1]][heldOnly.die[2]][heldOnly.die[3]][heldOnly.die[4]][heldOnly.die[5]];
-    }
 
-    public float advisedValue () {
-        Dice advisedOnly = new Dice(this);
-        for(int i = advised; i < 6; i++) {
-            advisedOnly.die[i] = 0;
-        }
-        return FarkelSolver.farkel_tree[0][advisedOnly.die[0]][advisedOnly.die[1]][advisedOnly.die[2]][advisedOnly.die[3]][advisedOnly.die[4]][advisedOnly.die[5]];
-
-    }
-
-    public float value () {
-        return FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
-    }
-
-    public float heldExpectedValue () {
-        Dice heldOnly = new Dice(this);
-        for(int i = held; i < 6; i++) {
-            heldOnly.die[i] = 0;
-        }
-        return FarkelSolver.farkel_tree[1][heldOnly.die[0]][heldOnly.die[1]][heldOnly.die[2]][heldOnly.die[3]][heldOnly.die[4]][heldOnly.die[5]];
-    }
-
-    public float advisedExpectedValue () {
-        Dice advisedOnly = new Dice(this);
-        for(int i = advised; i < 6; i++) {
-            advisedOnly.die[i] = 0;
-        }
-        return FarkelSolver.farkel_tree[1][advisedOnly.die[0]][advisedOnly.die[1]][advisedOnly.die[2]][advisedOnly.die[3]][advisedOnly.die[4]][advisedOnly.die[5]];
-
-    }
-
-    public float expectedValue() {
-        return FarkelSolver.farkel_tree[1][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
+        return  d;
     }
 
     public float valueInternal() {
 
         int i, c, r = 0;
-        // d[0] = number non-zero inputs, aka number of dice evaluating
-        // d[i] = number of i's rolled
-        int[] d = {0,0,0,0,0,0,0};
 
-        for(i = 0; i < 6; i++) {
-            d[die[i]]++;
-        }
+        int[] d = frequencies();
+
+        // d[0] = number non-zero inputs, aka number of dice evaluating
         d[0] = 6 - d[0];
 
         for (i=1,c=0;i<=6;i++) // 6 of a kind
@@ -264,6 +346,46 @@ public class Dice {
         return r;
     }
 
+        public float heldValue() {
+        Dice heldOnly = new Dice(this);
+        for(int i = held; i < 6; i++) {
+            heldOnly.die[i] = 0;
+        }
+        return Dice.farkel_hash.get(heldOnly.hashCode())[0];
+    }
+
+    public float advisedValue() {
+        Dice advisedOnly = new Dice(this);
+        for(int i = advised; i < 6; i++) {
+            advisedOnly.die[i] = 0;
+        }
+        return Dice.farkel_hash.get(advisedOnly.hashCode())[0];
+    }
+
+    public float value() {
+        return Dice.farkel_hash.get(this.hashCode())[0];
+    }
+
+    public float heldExpectedValue() {
+        Dice heldOnly = new Dice(this);
+        for(int i = held; i < 6; i++) {
+            heldOnly.die[i] = 0;
+        }
+        return Dice.farkel_hash.get(heldOnly.hashCode())[1];
+    }
+
+    public float advisedExpectedValue() {
+        Dice advisedOnly = new Dice(this);
+        for(int i = advised; i < 6; i++) {
+            advisedOnly.die[i] = 0;
+        }
+        return Dice.farkel_hash.get(advisedOnly.hashCode())[1];
+    }
+
+    public float expectedValue() {
+        return Dice.farkel_hash.get(this.hashCode())[1];
+    }
+
     public float expectedValueInternal() {
 
         int c, i, j, k, l, m, n;
@@ -275,7 +397,7 @@ public class Dice {
             if (0==die[i]) c++; // count the zeros
         }
 
-        curVal = FarkelSolver.farkel_tree[0][this.die[0]][this.die[1]][this.die[2]][this.die[3]][this.die[4]][this.die[5]];
+        curVal = Dice.farkel_hash.get(this.hashCode())[0];
 
         if (0 == c) return (float)curVal;
 
@@ -285,7 +407,7 @@ public class Dice {
         {
             if (0 == i) {
                 newHand.die[0] = die[0];
-                i = 7; // only use existing value of the die if the die is held
+                i = 7; // only use existing value_tree of the die if the die is held
             } else {
                 newHand.die[0] = i; // use all possible values for the die
             }
@@ -329,9 +451,15 @@ public class Dice {
                                 } else {
                                     newHand.die[5] = n;
                                 }
-                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > curVal)
-                                    expRollVal += FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]];
-                            }}}}}}
+                                float[] val = Dice.farkel_hash.get(newHand.hashCode());
+                                if (val[0] > curVal)
+                                    expRollVal += val[1];
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         for (i = 0; i < c; i++)
             expRollVal /= 6.0;
@@ -382,13 +510,18 @@ public class Dice {
                             {
                                 newHand.die[5] = (0==n)?0:die[5];
 
-                                // if new hand is keepable, and has a better expected value
-                                if (FarkelSolver.farkel_tree[0][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > heldVal
-                                        && FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]] > bestVal) {
-                                    bestVal = FarkelSolver.farkel_tree[1][newHand.die[0]][newHand.die[1]][newHand.die[2]][newHand.die[3]][newHand.die[4]][newHand.die[5]];
+                                float[] val = Dice.farkel_hash.get(newHand.hashCode());
+                                // if new hand is keepable, and has a better expected value_tree
+                                if (val[0] > heldVal && val[1] > bestVal) {
+                                    bestVal = val[1];
                                     bestHand.copy(newHand);
                                 }
-                            }}}}}}
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         // put rolled die at front of list
         i = 0;
@@ -412,5 +545,52 @@ public class Dice {
         bestHand.advised = j;
 
         return bestHand;
+    }
+
+    /*
+    public float uniquePermutations() {
+        int[] d = frequencies();
+
+        float up = Dice.factorial_0_to_6[6 - d[0]];
+
+        for (int i = 1; i < d.length; i++) {
+            up /= Dice.factorial_0_to_6[d[i]];
+        }
+
+        return up;
+    }
+    */
+
+    @Override
+    public int hashCode() {
+        // creates an integer based on the ordered values of the die
+        // this will be the same for all equivalent hands
+        int[] d = frequencies();
+
+        int hash = 0;
+        int shift = 15;
+
+        // concatenate bits of die values in order 0(unrolled) to 6
+        // die values fit in 3 bits
+        for (int i = 0; i < d.length; i++) {
+            for (int j = 0; j < d[i]; j++) {
+                hash |= i << shift;
+                shift -= 3;
+            }
+        }
+
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(this.getClass() == o.getClass()) {
+            Dice rhs = (Dice) o;
+            if (hashCode() == rhs.hashCode()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

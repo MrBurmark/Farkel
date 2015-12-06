@@ -3,6 +3,7 @@ package its.farkel;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,7 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 
-public class MainFarkel extends ActionBarActivity {
+public class MainFarkel extends AppCompatActivity {
 
     private enum die_states { NONE, UNHELD, ADVISED, HELD }
     private enum game_states { OK, SCRATCHED }
@@ -31,7 +32,7 @@ public class MainFarkel extends ActionBarActivity {
             ImageView v = (ImageView)findViewById(ids[i]);
             v.setImageAlpha(255 / 4);
         }
-        FarkelSolver.initFarkel();
+        Dice.initFarkel();
     }
 
     private boolean adviseDie(int id) {
@@ -157,7 +158,7 @@ public class MainFarkel extends ActionBarActivity {
 
     public void onclickStay(View view) {
         if (game_state != game_states.SCRATCHED) {
-            points += (int) hand.value(); // add value
+            points += (int) hand.value(); // add value_tree
             TextView v = (TextView) findViewById(R.id.PlayerTextView);
             v.setText(String.format("Points\n%d", points));
         }
